@@ -2,7 +2,7 @@
 
 #include "file_test.h"
 
-FATFS fatfs;
+extern FATFS fatfs;
 FIL newfile;
 FIL newfile2;
 
@@ -126,12 +126,12 @@ void read_speedtest()
     TIM_Cmd(TIM2, ENABLE);
     
     //打开一个较大的文件文件
-    fresult = f_mount(&fatfs,"1:",1);
+    fresult = f_mount(&fatfs,"0:",1);
     if(fresult)
     {
         usart_sendString(USART2,"挂载文件系统失败");
     }
-    fresult = f_open(&newfile, "1:music.wav",FA_READ);
+    fresult = f_open(&newfile, "0:music4.wav",FA_READ);
 
     if(fresult)
     {
@@ -190,8 +190,8 @@ uint8_t i_main_cnt = 0;
 void play()
 { 
     
-    fresult = f_mount(&fatfs,"1:",1);
-    fresult = f_open(&newfile, "1:music3.wav",FA_READ);
+    //fresult = f_mount(&fatfs,"1:",1);
+    fresult = f_open(&newfile, "0:music3.wav",FA_READ);
 	if(fresult==FR_OK)
 	{
 		usart_sendString(USART2,"打开music0文件成功");
@@ -236,12 +236,12 @@ void play()
                         stopPlay();
                         f_close(&newfile);
                         if(i==0)
-                          fresult = f_open(&newfile, "1:music3.wav",FA_READ);
+                          fresult = f_open(&newfile, "0:music3.wav",FA_READ);
                         else if(i==1)
-                          fresult = f_open(&newfile, "1:music4.wav",FA_READ);
+                          fresult = f_open(&newfile, "0:music4.wav",FA_READ);
                         else if(i==2)
                         {
-                            fresult = f_open(&newfile, "1:music5.wav",FA_READ);
+                            fresult = f_open(&newfile, "0:music5.wav",FA_READ);
                             i=0;
                         }
                         fresult = f_read(&newfile, &wavhead, sizeof(wavhead), &fnum);

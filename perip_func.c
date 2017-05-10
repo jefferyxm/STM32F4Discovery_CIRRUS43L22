@@ -164,3 +164,16 @@ static uint32_t Exception_callback(char *str)
   usart_sendString(USART2, str);
   return 0;
 }
+
+
+void usart_debugMessage(char*str)
+{
+      uint8_t k = 0;
+      do
+      {
+              usart_sendByte(USART2,*(str+k));
+              k++;
+      }while(*(str+k)!='\0');
+      while(USART_GetFlagStatus(USART2,USART_FLAG_TC));	
+
+}

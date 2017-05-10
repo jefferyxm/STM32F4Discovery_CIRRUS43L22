@@ -175,6 +175,7 @@
           <state>USE_STDPERIPH_DRIVER</state>
           <state>STM32F401xx</state>
           <state>STM32F401xx</state>
+          <state>USE_USB_OTG_FS</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -309,6 +310,9 @@
           <state>$PROJ_DIR$\..\Libraries\CMSIS\Device\ST\STM32F4xx\Include</state>
           <state>$PROJ_DIR$\..\Libraries\STM32F4xx_StdPeriph_Driver\inc</state>
           <state>$PROJ_DIR$\..\CIR43L22</state>
+          <state>$PROJ_DIR$\..\Libraries\STM32_USB_HOST_Library\Core\inc</state>
+          <state>$PROJ_DIR$\..\Libraries\STM32_USB_HOST_Library\Class\MSC\inc</state>
+          <state>$PROJ_DIR$\..\Libraries\STM32_USB_OTG_Driver\inc</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1019,6 +1023,9 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\Fatfs12b\diskio.c</name>
+        <excluded>
+          <configuration>STM32F401xx</configuration>
+        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\Fatfs12b\ff.c</name>
@@ -1050,6 +1057,54 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\inc\stm32f4xx_it.h</name>
+    </file>
+  </group>
+  <group>
+    <name>STM32_USB_HOST_Library</name>
+    <group>
+      <name>CLASS</name>
+      <group>
+        <name>MSC</name>
+        <file>
+          <name>$PROJ_DIR$\..\Libraries\STM32_USB_HOST_Library\Class\MSC\src\usbh_msc_bot.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\Libraries\STM32_USB_HOST_Library\Class\MSC\src\usbh_msc_core.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\Libraries\STM32_USB_HOST_Library\Class\MSC\src\usbh_msc_fatfs.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\Libraries\STM32_USB_HOST_Library\Class\MSC\src\usbh_msc_scsi.c</name>
+        </file>
+      </group>
+    </group>
+    <group>
+      <name>CORE</name>
+      <file>
+        <name>$PROJ_DIR$\..\Libraries\STM32_USB_HOST_Library\Core\src\usbh_core.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\Libraries\STM32_USB_HOST_Library\Core\src\usbh_hcs.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\Libraries\STM32_USB_HOST_Library\Core\src\usbh_ioreq.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\Libraries\STM32_USB_HOST_Library\Core\src\usbh_stdreq.c</name>
+      </file>
+    </group>
+  </group>
+  <group>
+    <name>STM32_USB_OTG_Driver</name>
+    <file>
+      <name>$PROJ_DIR$\..\Libraries\STM32_USB_OTG_Driver\src\usb_core.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Libraries\STM32_USB_OTG_Driver\src\usb_hcd.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Libraries\STM32_USB_OTG_Driver\src\usb_hcd_int.c</name>
     </file>
   </group>
   <group>
@@ -1302,6 +1357,12 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\stm32f4xx_it.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\usb_bsp.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\usbh_usr.c</name>
     </file>
   </group>
 </project>

@@ -29,12 +29,18 @@
 #include "main.h"
 #include "perip_func.h"
 
+#include "usbh_core.h"
+#include "usbh_usr.h"
+#include "usbh_msc_core.h"
+
 static __IO uint32_t uwTimingDelay;
 RCC_ClocksTypeDef RCC_Clocks;
 
 /* Private function prototypes -----------------------------------------------*/
 static void Delay(__IO uint32_t nTime);
 
+__ALIGN_BEGIN USBH_HOST                USB_Host __ALIGN_END;
+__ALIGN_BEGIN USB_OTG_CORE_HANDLE      USB_OTG_Core __ALIGN_END;
 
 uint8_t mount_fatfs(void);
 void writFile();
@@ -57,8 +63,7 @@ int main(void)
     //perip_I2C2_init();
     
     perip_I2C1_init();
-    
-    
+
     //TIM_init();
     //MCO_init();
     
@@ -81,7 +86,18 @@ int main(void)
     Init_CIR43L22();
     I2S3_Init();
     
-    play();
+    
+    USBH_Init(&USB_OTG_Core, 
+#ifdef USE_USB_OTG_FS  
+            USB_OTG_FS_CORE_ID,
+#else 
+            USB_OTG_HS_CORE_ID,
+#endif 
+            &USB_Host,
+            &USBH_MSC_cb, 
+            &USR_cb);
+    
+    //play();
 	
     //mount_fatfs();
     
@@ -99,7 +115,10 @@ int main(void)
     //usart_sendString(USART2,"helloworld");
 
     //EXTI_config();
-    while(1);
+    while(1)
+    {
+       USBH_Process(&USB_OTG_Core, &USB_Host);
+    };
 }
 
 void Delay(__IO uint32_t nTime)

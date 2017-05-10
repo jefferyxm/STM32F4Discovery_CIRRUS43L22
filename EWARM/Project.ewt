@@ -180,6 +180,54 @@
     </file>
   </group>
   <group>
+    <name>STM32_USB_HOST_Library</name>
+    <group>
+      <name>CLASS</name>
+      <group>
+        <name>MSC</name>
+        <file>
+          <name>$PROJ_DIR$\..\Libraries\STM32_USB_HOST_Library\Class\MSC\src\usbh_msc_bot.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\Libraries\STM32_USB_HOST_Library\Class\MSC\src\usbh_msc_core.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\Libraries\STM32_USB_HOST_Library\Class\MSC\src\usbh_msc_fatfs.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\Libraries\STM32_USB_HOST_Library\Class\MSC\src\usbh_msc_scsi.c</name>
+        </file>
+      </group>
+    </group>
+    <group>
+      <name>CORE</name>
+      <file>
+        <name>$PROJ_DIR$\..\Libraries\STM32_USB_HOST_Library\Core\src\usbh_core.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\Libraries\STM32_USB_HOST_Library\Core\src\usbh_hcs.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\Libraries\STM32_USB_HOST_Library\Core\src\usbh_ioreq.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\Libraries\STM32_USB_HOST_Library\Core\src\usbh_stdreq.c</name>
+      </file>
+    </group>
+  </group>
+  <group>
+    <name>STM32_USB_OTG_Driver</name>
+    <file>
+      <name>$PROJ_DIR$\..\Libraries\STM32_USB_OTG_Driver\src\usb_core.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Libraries\STM32_USB_OTG_Driver\src\usb_hcd.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Libraries\STM32_USB_OTG_Driver\src\usb_hcd_int.c</name>
+    </file>
+  </group>
+  <group>
     <name>STM32F4xx_StdPeriph_Driver</name>
     <file>
       <name>$PROJ_DIR$\..\Libraries\STM32F4xx_StdPeriph_Driver\src\misc.c</name>
@@ -333,6 +381,12 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\stm32f4xx_it.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\usb_bsp.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\usbh_usr.c</name>
     </file>
   </group>
 </project>

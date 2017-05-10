@@ -30,7 +30,12 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_it.h"
 #include "main.h"
+#include "usb_bsp.h"
+#include "usb_hcd_int.h"
+#include "usbh_core.h"
 
+extern USB_OTG_CORE_HANDLE          USB_OTG_Core;
+extern USBH_HOST                    USB_Host;
 /** @addtogroup Template_Project
   * @{
   */
@@ -165,6 +170,15 @@ void EXTI0_IRQHandler()
                 
 		EXTI_ClearITPendingBit(EXTI_Line0);
 	}
+}
+
+#ifdef USE_USB_OTG_FS  
+void OTG_FS_IRQHandler(void)
+#else
+void OTG_HS_IRQHandler(void)
+#endif
+{
+  USBH_OTG_ISR_Handler(&USB_OTG_Core);
 }
 
 
