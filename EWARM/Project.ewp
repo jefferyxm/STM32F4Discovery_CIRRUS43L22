@@ -718,7 +718,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>C:\Users\jeffe\Desktop\Radiof401dcry\EWARM\stm32f4xx_flash.icf</state>
+          <state>$PROJ_DIR$\stm32f4xx_flash.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>

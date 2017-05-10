@@ -354,7 +354,7 @@ void I2S3_Init()
     I2S_InitStruct.I2S_Mode = I2S_Mode_MasterTx;
     I2S_InitStruct.I2S_Standard = I2S_Standard_LSB;
     I2S_InitStruct.I2S_DataFormat = I2S_DataFormat_16b;
-    I2S_InitStruct.I2S_AudioFreq = I2S_AudioFreq_22k;
+    I2S_InitStruct.I2S_AudioFreq = I2S_AudioFreq_44k;
     I2S_InitStruct.I2S_MCLKOutput = I2S_MCLKOutput_Enable;
     I2S_InitStruct.I2S_CPOL = I2S_CPOL_Low;
     I2S_Init(SPI3, &I2S_InitStruct);

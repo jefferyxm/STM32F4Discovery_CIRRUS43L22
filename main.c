@@ -64,7 +64,7 @@ int main(void)
     
     SPI1_Init(0);
     MSD0_Init();
-    SPI1_Init(2);
+    SPI1_Init(1);
     
     capacity = 7948206080;
     

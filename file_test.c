@@ -191,10 +191,10 @@ void play()
 { 
     
     fresult = f_mount(&fatfs,"1:",1);
-    fresult = f_open(&newfile, "1:music2.wav",FA_READ);
+    fresult = f_open(&newfile, "1:music3.wav",FA_READ);
 	if(fresult==FR_OK)
 	{
-		usart_sendString(USART2,"打开music2文件成功");
+		usart_sendString(USART2,"打开music0文件成功");
                 //读取wave音频头信息
 		fresult = f_read(&newfile, &wavhead, sizeof(wavhead), &fnum);
                 
@@ -203,6 +203,7 @@ void play()
                 fresult = f_read(&newfile, (uint16_t *)buffer1, 512,&fnum);
                 
                 I2S3_TX_DMAInit(buffer0, buffer1, 256);
+                
                 
                 startPlay();  // 开启dma传输，开始播放了  先使用存储器0播放
                 int i  = 0;
@@ -213,7 +214,6 @@ void play()
                         if(bufferflag==0)  // buffer0 空闲  //   
                         {
                             fresult = f_read(&newfile, (uint16_t *)buffer0, 512,&fnum);
-                        
                             //usart_sendByte(USART2,(uint8_t)(buffer0[0]&0xff));
                         }
                         else
@@ -225,7 +225,7 @@ void play()
                             
                         if(fresult!=FR_OK)
                         {
-                                usart_sendString(USART2,"播放出错");
+                                usart_sendString(USART2,"播放出错1");
                                 stopPlay();
                                 f_close(&newfile);
                         }                             
@@ -236,12 +236,12 @@ void play()
                         stopPlay();
                         f_close(&newfile);
                         if(i==0)
-                          fresult = f_open(&newfile, "1:music2.wav",FA_READ);
-                        else if(i==1)
                           fresult = f_open(&newfile, "1:music3.wav",FA_READ);
+                        else if(i==1)
+                          fresult = f_open(&newfile, "1:music4.wav",FA_READ);
                         else if(i==2)
                         {
-                            fresult = f_open(&newfile, "1:music4.wav",FA_READ);
+                            fresult = f_open(&newfile, "1:music5.wav",FA_READ);
                             i=0;
                         }
                         fresult = f_read(&newfile, &wavhead, sizeof(wavhead), &fnum);
