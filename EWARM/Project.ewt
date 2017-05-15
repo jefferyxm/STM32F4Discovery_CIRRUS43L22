@@ -180,6 +180,90 @@
     </file>
   </group>
   <group>
+    <name>LIBMAD</name>
+    <group>
+      <name>INC</name>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\bit.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\decoder.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\fixed.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\frame.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\global.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\huffman.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\layer12.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\layer3.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\mad.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\stream.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\synth.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\timer.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\version.h</name>
+      </file>
+    </group>
+    <group>
+      <name>SRC</name>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\bit.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\decoder.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\fixed.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\frame.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\huffman.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\layer12.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\layer3.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\minimad.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\stream.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\synth.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\timer.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\libmad\version.c</name>
+      </file>
+    </group>
+  </group>
+  <group>
     <name>STM32_USB_HOST_Library</name>
     <group>
       <name>CLASS</name>
@@ -366,6 +450,9 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\main.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\MP3Player.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\perip_func.c</name>
