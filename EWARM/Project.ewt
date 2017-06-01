@@ -446,6 +446,9 @@
       <name>$PROJ_DIR$\..\board_init.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\bstdfile.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\file_test.c</name>
     </file>
     <file>

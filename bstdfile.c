@@ -49,7 +49,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 //#include <memory.h>
-//#include <errno.h>
+#include <errno.h>
 //#include <sys/types.h>
 #include "bstdfile.h"
 

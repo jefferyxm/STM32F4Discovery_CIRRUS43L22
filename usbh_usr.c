@@ -80,6 +80,9 @@ uint8_t filenameString[15]  = {0};
 
 FATFS fatfs;
 FIL file;
+extern FIL newfile;
+extern FIL newfile2;
+extern FRESULT fresult;
 uint8_t Image_Buf[IMAGE_BUFFER_SIZE];
 uint8_t line_idx = 0;   
 
@@ -403,7 +406,7 @@ void USBH_USR_OverCurrentDetected (void)
 * @retval Status
 */
 void play();
-
+int MpegAudioDecoder(FIL *InputFp, FIL *OutputFp);
 int USBH_USR_MSC_Application(void)
 {
   FRESULT res;
@@ -506,7 +509,19 @@ int USBH_USR_MSC_Application(void)
         return(-1);
       }
       
-      play();
+      //打开文件
+      
+      
+      if(fresult = f_open(&newfile, "0:123.mp3",FA_READ))
+      {
+          
+      }
+      if(f_open(&newfile2, "0:123.wav",FA_CREATE_ALWAYS | FA_WRITE) == FR_OK)
+      {
+          
+      }
+      MpegAudioDecoder(&newfile,&newfile2);
+      //play();
       //read_speedtest();
       //return Image_Browser("0:/");
     }

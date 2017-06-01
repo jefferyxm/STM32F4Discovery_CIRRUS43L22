@@ -1427,6 +1427,12 @@
       <name>$PROJ_DIR$\..\board_init.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\bstdfile.c</name>
+      <excluded>
+        <configuration>STM32F401xx</configuration>
+      </excluded>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\file_test.c</name>
     </file>
     <file>
