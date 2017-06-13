@@ -32,6 +32,9 @@
 #include "usbh_core.h"
 #include "usbh_usr.h"
 #include "usbh_msc_core.h"
+#include "file_test.h"
+#include "player.h"
+#include "CIR43L22.h"
 
 static __IO uint32_t uwTimingDelay;
 RCC_ClocksTypeDef RCC_Clocks;
@@ -42,47 +45,36 @@ static void Delay(__IO uint32_t nTime);
 __ALIGN_BEGIN USBH_HOST                USB_Host __ALIGN_END;
 __ALIGN_BEGIN USB_OTG_CORE_HANDLE      USB_OTG_Core __ALIGN_END;
 
-uint8_t mount_fatfs(void);
-void writFile();
-void readFile();
-void read_speedtest();
-
-u32 blocksize ,sector,rdBlockLen,deviceSize,deviceSizeMul;
 uint64_t capacity;
 extern MSD_CARDINFO SD0_CardInfo;
 
-void play();
-void Init_CIR43L22();
+
+
+char USBH_Path[4];  
+char MSD_Path[4];
+extern Diskio_drvTypeDef  USBH_Driver;
+extern Diskio_drvTypeDef  MSD_Driver;
+
 
 int main(void)
 {
     SystemInit();
     bsp_led_init();
     perip_uart_init();
-    //START_SYSTICK();
-    //perip_I2C2_init();
     
     perip_I2C1_init();
 
-    //TIM_init();
-    //MCO_init();
-    
-    SPI1_Init(0);
-    MSD0_Init();
-    SPI1_Init(1);
-    
-    capacity = 7948206080;
-    
-    MSD0_GetCardInfo(&SD0_CardInfo);
-    
-    blocksize = SD0_CardInfo.BlockSize;
-    capacity = SD0_CardInfo.Capacity;
-    sector = SD0_CardInfo.Capacity/SD0_CardInfo.BlockSize;
-    rdBlockLen = SD0_CardInfo.CSD.RdBlockLen;            //9
-    deviceSize = SD0_CardInfo.CSD.DeviceSize;           //15159
-    deviceSizeMul = SD0_CardInfo.CSD.DeviceSizeMul;     //6
-    
-    
+//    TIM_init();
+//    MCO_init();
+//    
+//    SPI1_Init(0);
+//    MSD0_Init();
+//    SPI1_Init(1);
+//    
+//    capacity = 7948206080;
+//
+//    MSD0_GetCardInfo(&SD0_CardInfo);
+
     Init_CIR43L22();
     I2S3_Init();
     
@@ -96,25 +88,17 @@ int main(void)
             &USB_Host,
             &USBH_MSC_cb, 
             &USR_cb);
-    
-    //play();
+
+    FATFS_LinkDriver(&USBH_Driver, USBH_Path);
+
 	
     //mount_fatfs();
     
     //writFile();
     //readFile();
     //read_speedtest();
-      
-    //RCC_GetClocksFreq(&RCC_Clocks);
-    //SysTick_Config(RCC_Clocks.HCLK_Frequency/100);
-    
+    //play();
 
-    //GPIO_Init(GPIOB,&GPIO_Init_Struct);
-    
-    //ano_sendDebug(0,6);
-    //usart_sendString(USART2,"helloworld");
-
-    //EXTI_config();
     while(1)
     {
        USBH_Process(&USB_OTG_Core, &USB_Host);

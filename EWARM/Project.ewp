@@ -1025,12 +1025,21 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\Fatfs12b\diskio.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\Fatfs12b\ff.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\Fatfs12b\ff_gen_drv.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\Fatfs12b\msd_diskio.c</name>
         <excluded>
           <configuration>STM32F401xx</configuration>
         </excluded>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\Fatfs12b\ff.c</name>
+        <name>$PROJ_DIR$\..\Fatfs12b\usbh_diskio.c</name>
       </file>
     </group>
   </group>
@@ -1162,6 +1171,9 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\Libraries\STM32_USB_HOST_Library\Class\MSC\src\usbh_msc_fatfs.c</name>
+          <excluded>
+            <configuration>STM32F401xx</configuration>
+          </excluded>
         </file>
         <file>
           <name>$PROJ_DIR$\..\Libraries\STM32_USB_HOST_Library\Class\MSC\src\usbh_msc_scsi.c</name>
@@ -1436,16 +1448,19 @@
       <name>$PROJ_DIR$\..\file_test.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\main.c</name>
+      <name>$PROJ_DIR$\..\madlld.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\MP3Player.c</name>
+      <name>$PROJ_DIR$\..\main.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\perip_func.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\perip_Systick.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Fatfs12b\player.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\sdCard.c</name>

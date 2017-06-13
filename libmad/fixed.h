@@ -18,7 +18,7 @@
  *
  * $Id: fixed.h,v 1.38 2004/02/17 02:02:03 rob Exp $
  */
-#include"config.h"
+#include "libmad_config.h"
 # ifndef LIBMAD_FIXED_H
 # define LIBMAD_FIXED_H
 

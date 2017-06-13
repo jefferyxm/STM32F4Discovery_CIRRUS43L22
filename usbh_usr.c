@@ -32,6 +32,8 @@
 #include "usbh_msc_core.h"
 #include "usbh_msc_scsi.h"
 #include "usbh_msc_bot.h"
+#include "player.h"
+extern char USBH_Path[4];
 
 /** @addtogroup USBH_USER
 * @{
@@ -78,11 +80,11 @@ extern USB_OTG_CORE_HANDLE          USB_OTG_Core;
 uint8_t USBH_USR_ApplicationState = USH_USR_FS_INIT;
 uint8_t filenameString[15]  = {0};
 
-FATFS fatfs;
-FIL file;
-extern FIL newfile;
-extern FIL newfile2;
-extern FRESULT fresult;
+static FATFS fatfs;
+static FIL file;
+static FIL newfile;
+static FIL newfile2;
+static FRESULT fresult;
 uint8_t Image_Buf[IMAGE_BUFFER_SIZE];
 uint8_t line_idx = 0;   
 
@@ -405,7 +407,6 @@ void USBH_USR_OverCurrentDetected (void)
 * @param  None
 * @retval Status
 */
-void play();
 int MpegAudioDecoder(FIL *InputFp, FIL *OutputFp);
 int USBH_USR_MSC_Application(void)
 {
@@ -503,27 +504,38 @@ int USBH_USR_MSC_Application(void)
   
     while(HCD_IsDeviceConnected(&USB_OTG_Core))
     {
-      if ( f_mount( &fatfs, "", 0) != FR_OK )   //挂载
+      if (f_mount(&fatfs, USBH_Path, 0) != FR_OK )   //挂载
       {
         /* fat_fs initialisation fails*/
         return(-1);
       }
       
       //打开文件
+      char filePath[50] = {0};
+      strcat(filePath,USBH_Path);
+      strcat(filePath,"music3.wav");
+//      fresult = f_open(&newfile, filePath ,FA_READ);
+//      if(fresult==FR_OK)
+//      {
+//          playWAV(&newfile,0);
+//      }
       
       
-      if(fresult = f_open(&newfile, "0:123.mp3",FA_READ))
+      fresult = f_open(&newfile, "0:123.mp3",FA_READ);
+      if(fresult==FR_OK)
       {
           
       }
-      if(f_open(&newfile2, "0:123.wav",FA_CREATE_ALWAYS | FA_WRITE) == FR_OK)
+      
+      fresult = f_open(&newfile2, "0:123.wav",FA_CREATE_ALWAYS|FA_WRITE);
+      if(fresult==FR_OK)
       {
-          
+          MpegAudioDecoder(&newfile,&newfile2);
       }
-      MpegAudioDecoder(&newfile,&newfile2);
+
+      //MpegAudioDecoder(&newfile,&newfile2);
       //play();
       //read_speedtest();
-      //return Image_Browser("0:/");
     }
     break;
   default: break;
