@@ -148,8 +148,6 @@ const uint8_t MSG_UNREC_ERROR[]      = "> UNRECOVERED ERROR STATE\n";
 * @{
 */
 static uint8_t Explore_Disk (char* path , uint8_t recu_level);
-static uint8_t Image_Browser (char* path);
-static void     Show_Image(void);
 static void     Toggle_Leds(void);
 
 void usart_debugMessage(char*str);
@@ -416,129 +414,113 @@ int USBH_USR_MSC_Application(void)
   
   switch(USBH_USR_ApplicationState)
   {
-  case USH_USR_FS_INIT: 
-    
-    /* Initialises the File System*/
-    if ( f_mount(&fatfs, "", 0) != FR_OK ) 
-    {
-      /* efs initialisation fails*/
-      usart_debugMessage("> Cannot initialize File System.");
-      return(-1);
-    }
-    usart_debugMessage("> File System initialized.");
- 
-    if(USBH_MSC_Param.MSWriteProtect == DISK_WRITE_PROTECTED)
-    {
-      //LCD_ErrLog((void *)MSG_WR_PROTECT);
-    }
-    
-    USBH_USR_ApplicationState = USH_USR_FS_READLIST;
-    break;
-    
-  case USH_USR_FS_READLIST:
-    
-    //LCD_UsrLog((void *)MSG_ROOT_CONT);
-    Explore_Disk("0:/", 1);
-    line_idx = 0;   
-    USBH_USR_ApplicationState = USH_USR_FS_WRITEFILE;
-    
-    break;
-    
-  case USH_USR_FS_WRITEFILE:
-    
-    USB_OTG_BSP_mDelay(100);
-    
-    /*Key B3 in polling*/
-    //while(HCD_IsDeviceConnected(&USB_OTG_Core))        
-    {
-      Toggle_Leds();
-    }
-    /* Writes a text file, STM32.TXT in the disk*/
-    usart_debugMessage("> Writing File to disk flash ...");
-    if(USBH_MSC_Param.MSWriteProtect == DISK_WRITE_PROTECTED)
-    {
-      
-      usart_debugMessage ( "> Disk flash is write protected ");
-      USBH_USR_ApplicationState = USH_USR_FS_DRAW;
-      break;
-    }
-    
-    /* Register work area for logical drives */
-    f_mount(&fatfs, "", 0);
-    
-    if(f_open(&file, "0:STM32.TXT",FA_CREATE_ALWAYS | FA_WRITE) == FR_OK)
-    { 
-      /* Write buffer to file */
-      bytesToWrite = sizeof(writeTextBuff); 
-      res= f_write (&file, writeTextBuff, bytesToWrite, (void *)&bytesWritten);   
-      
-      if((bytesWritten == 0) || (res != FR_OK)) /*EOF or Error*/
-      {
-        //LCD_ErrLog("> STM32.TXT CANNOT be writen.\n");
-      }
-      else
-      {
-        //LCD_UsrLog("> 'STM32.TXT' file created\n");
-      }
-      
-      /*close file and filesystem*/
-      f_close(&file);
-      f_mount(NULL, "", 0); 
-    }
-    
-    else
-    {
-      //LCD_UsrLog ("> STM32.TXT created in the disk\n");
-    }
-
-    USBH_USR_ApplicationState = USH_USR_FS_DRAW; 
-    break;
-    
-  case USH_USR_FS_DRAW:
-    usart_debugMessage("> ≤•∑≈“Ù¿÷");
-    /*Key B3 in polling*/
-    //while(HCD_IsDeviceConnected(&USB_OTG_Core)) 
-    {
-      Toggle_Leds();
-    }
-  
-    while(HCD_IsDeviceConnected(&USB_OTG_Core))
-    {
-      if (f_mount(&fatfs, USBH_Path, 0) != FR_OK )   //π“‘ÿ
-      {
-        /* fat_fs initialisation fails*/
-        return(-1);
-      }
-      
-      //¥Úø™Œƒº˛
-      char filePath[50] = {0};
-      strcat(filePath,USBH_Path);
-      strcat(filePath,"music3.wav");
-//      fresult = f_open(&newfile, filePath ,FA_READ);
-//      if(fresult==FR_OK)
-//      {
-//          playWAV(&newfile,0);
-//      }
-      
-      
-      fresult = f_open(&newfile, "0:123.mp3",FA_READ);
-      if(fresult==FR_OK)
-      {
+      case USH_USR_FS_INIT: 
+        
+          /* Initialises the File System*/
+          if ( f_mount(&fatfs, "", 0) != FR_OK ) 
+          {
+            /* efs initialisation fails*/
+            usart_debugMessage("> Cannot initialize File System. \r\n");
+            return(-1);
+          }
+          usart_debugMessage("> File System initialized. \r\n");
+       
+          if(USBH_MSC_Param.MSWriteProtect == DISK_WRITE_PROTECTED)
+          {
+            //LCD_ErrLog((void *)MSG_WR_PROTECT);
+          }
           
-      }
-      
-      fresult = f_open(&newfile2, "0:123.wav",FA_CREATE_ALWAYS|FA_WRITE);
-      if(fresult==FR_OK)
-      {
-          MpegAudioDecoder(&newfile,&newfile2);
-      }
+          USBH_USR_ApplicationState = USH_USR_FS_READLIST;
+          break;
+        
+      case USH_USR_FS_READLIST:
+        
+          //LCD_UsrLog((void *)MSG_ROOT_CONT);
+          Explore_Disk("0:/", 1);
+          line_idx = 0;   
+          USBH_USR_ApplicationState = USH_USR_FS_WRITEFILE;
+          
+          break;
+        
+      case USH_USR_FS_WRITEFILE:
+        
+          USB_OTG_BSP_mDelay(100);
+          
+          /*Key B3 in polling*/
+          //while(HCD_IsDeviceConnected(&USB_OTG_Core))        
+          {
+            Toggle_Leds();
+          }
+          /* Writes a text file, STM32.TXT in the disk*/
+          usart_debugMessage("> Writing File to disk flash ...\r\n");
+          if(USBH_MSC_Param.MSWriteProtect == DISK_WRITE_PROTECTED)
+          {
+            
+            usart_debugMessage ( "> Disk flash is write protected\r\n");
+            USBH_USR_ApplicationState = USH_USR_FS_PLAY;
+            break;
+          }
+          
+          char fileName[] = "usbfile.txt";
+          char fileBuff[] = "STM32 Connectivity line Host Demo application using FAT_FS";
+          
+          /* Register work area for logical drives */
+          f_mount(&fatfs, "", 0);
 
-      //MpegAudioDecoder(&newfile,&newfile2);
-      //play();
-      //read_speedtest();
-    }
-    break;
-  default: break;
+          if(writFile(USBH_Path, fileName, fileBuff, sizeof(fileBuff)))
+          {
+              usart_debugMessage ( "> wirte file success\r\n");
+          }
+          else
+          {
+              usart_debugMessage ( "> wirte file failed\r\n");
+          }
+
+          USBH_USR_ApplicationState = USH_USR_FS_PLAY; 
+          break;
+        
+      case USH_USR_FS_PLAY:
+          usart_debugMessage("> ≤•∑≈“Ù¿÷\r\n");
+          /*Key B3 in polling*/
+          //while(HCD_IsDeviceConnected(&USB_OTG_Core)) 
+          {
+            Toggle_Leds();
+          }
+        
+          while(HCD_IsDeviceConnected(&USB_OTG_Core))
+          {
+            if (f_mount(&fatfs, USBH_Path, 0) != FR_OK )   //π“‘ÿ
+            {
+              /* fat_fs initialisation fails*/
+              return(-1);
+            }
+
+            // ∂¡–¥ÀŸ∂»≤‚ ‘
+            //read_speedtest(USBH_Path,"music3.wav");
+        
+            //≤•∑≈“Ù¿÷
+            //playWAV(USBH_Path,"music3.wav",0);
+            
+            
+            fresult = f_open(&newfile2, "0:123.wav",FA_CREATE_ALWAYS|FA_WRITE);
+            fresult = f_open(&newfile, "0:music4.mp3",FA_READ);
+            if(fresult==FR_OK)
+            {
+                
+            }
+            
+            
+            if(fresult==FR_OK)
+            {
+                MpegAudioDecoder(&newfile,&newfile2);
+            }
+
+            //MpegAudioDecoder(&newfile,&newfile2);
+            //play();
+            //read_speedtest();
+        }
+        break;
+      default: break;
   }
   return(0);
 }
@@ -566,21 +548,6 @@ static uint8_t Explore_Disk (char* path , uint8_t recu_level)
   return res;
 }
 
-static uint8_t Image_Browser (char* path)
-{
-  return 0;
-}
-
-/**
-* @brief  Show_Image 
-*         Displays BMP image
-* @param  None
-* @retval None
-*/
-static void Show_Image(void)
-{
-  
-}
 
 /**
 * @brief  Toggle_Leds

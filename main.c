@@ -77,8 +77,7 @@ int main(void)
 
     Init_CIR43L22();
     I2S3_Init();
-    
-    
+        
     USBH_Init(&USB_OTG_Core, 
 #ifdef USE_USB_OTG_FS  
             USB_OTG_FS_CORE_ID,
@@ -90,14 +89,6 @@ int main(void)
             &USR_cb);
 
     FATFS_LinkDriver(&USBH_Driver, USBH_Path);
-
-	
-    //mount_fatfs();
-    
-    //writFile();
-    //readFile();
-    //read_speedtest();
-    //play();
 
     while(1)
     {

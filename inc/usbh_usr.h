@@ -72,7 +72,7 @@ extern  USBH_Usr_cb_TypeDef USR_cb;
 #define USH_USR_FS_INIT       0
 #define USH_USR_FS_READLIST   1
 #define USH_USR_FS_WRITEFILE  2
-#define USH_USR_FS_DRAW       3
+#define USH_USR_FS_PLAY       3
 /**
   * @}
   */ 

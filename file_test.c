@@ -1,6 +1,7 @@
 #define MMC_Root_Path "1:"
 
 #include "file_test.h"
+#include <string.h>
 
 static FRESULT fresult;
 
@@ -21,57 +22,75 @@ uint32_t count;
 BYTE speedtestBuff[1024];
 
 // 格式化文件系统
-void mount_fatfs(void)
+void format_fatfs(char *rootPath)
 {
-    fresult = f_mount(&fatfs, "1:", 1);
+    fresult = f_mount(&fatfs, rootPath, 1);
     
-    fresult = f_mkfs("1:",FM_FAT32, 0, workbuff,sizeof(workbuff));
+    if(fresult==FR_OK)
+            usart_sendString(USART2,"挂载成功");
+        else
+            usart_sendString(USART2,"挂载失败");
+    
+    
+    fresult = f_mkfs(rootPath,FM_FAT32, 0, workbuff,sizeof(workbuff));
         if(fresult==FR_OK)
             usart_sendString(USART2,"格式化sd卡成功");
         else
             usart_sendString(USART2,"格式化sd卡失败");
 }
 
-void writFile()
+bool writFile(char *rootPath, char *fileName, char* fileBuff, uint32_t buffSize)
 {
-        fresult = f_mount(&fatfs, "1:", 1);  //挂载文件系统
+      fresult = f_mount(&fatfs, rootPath, 1);  //挂载文件系统
+      
+      char filePath[50] = {0};
+      strcat(filePath,rootPath);
+      strcat(filePath,fileName);
 
-        //打开文件
-        fresult = f_open(&newfile, "1:中文测试.txt", FA_CREATE_ALWAYS|FA_WRITE);
-	if(fresult==FR_OK)
-            usart_sendString(USART2,"创建文件成功");
-        else
-            usart_sendString(USART2,"创建文件失败");
-        
-        //写文件内容
-        
-        f_write (
-	&newfile,			/* Pointer to the file object */
-	file_buff,	/* Pointer to the data to be written */
-	sizeof(file_buff),			/* Number of bytes to write */
-	&fnum			/* Pointer to number of bytes written */
-);
-        
-	f_close(&newfile);
-        
+      //打开文件
+      fresult = f_open(&newfile, filePath, FA_CREATE_ALWAYS|FA_WRITE);
+      if(fresult==FR_OK)
+      {
+          //写文件内容
+          f_write (
+                    &newfile,			/* Pointer to the file object */
+                    fileBuff,	                /* Pointer to the data to be written */
+                    buffSize,			/* Number of bytes to write */
+                    &fnum			/* Pointer to number of bytes written */
+              );
+          usart_sendString(USART2,"创建文件成功");
+          f_close(&newfile);
+          return true;
+      }
+      else
+      {
+          usart_sendString(USART2,"创建文件失败");
+          return false;
+      }
 }
 
 
-void readFile()
+void readFile(char *rootPath, char *fileName, char* fileBuff, uint32_t buffSize)
 {
-    fresult = f_mount(&fatfs,"1:",1);
-    fresult = f_open(&newfile, "1:中文测试.txt",FA_READ);
-	if(fresult==FR_OK)
-	{
-		usart_sendString(USART2,"打开文件成功");
-		fresult = f_read(&newfile, read_buff, sizeof(file_buff), &fnum);
-		usart_sendMessage(USART2, read_buff, fnum);
-                f_close(&newfile);
-                usart_sendString(USART2,"文件读取完成");
-	}
-            
-        else
-            usart_sendString(USART2,"打开文件失败");
+    fresult = f_mount(&fatfs,rootPath,1);
+    
+    char filePath[50] = {0};
+    strcat(filePath,rootPath);
+    strcat(filePath,fileName);
+    
+    fresult = f_open(&newfile, filePath,FA_READ);
+    if(fresult==FR_OK)
+    {
+            usart_sendString(USART2,"打开文件成功");
+            fresult = f_read(&newfile, fileBuff, buffSize, &fnum);
+            usart_sendMessage(USART2, fileBuff, fnum);
+            f_close(&newfile);
+            usart_sendString(USART2,"文件读取完成");
+    }      
+    else
+    {
+        usart_sendString(USART2,"打开文件失败");
+    }    
 	
 }
 
@@ -101,7 +120,7 @@ UINT outStream(const BYTE *p, UINT c)
 }
 
 
-void read_speedtest()
+void read_speedtest(char *rootPath, char *fileName)
 {
     //初始化一个定时器，1s定时
     //开启时钟
@@ -128,13 +147,18 @@ void read_speedtest()
     
     TIM_Cmd(TIM2, ENABLE);
     
+    
+    char filePath[50] = {0};
+    strcat(filePath,rootPath);
+    strcat(filePath,fileName);
+    
     //打开一个较大的文件文件
-    fresult = f_mount(&fatfs,"0:",1);
+    fresult = f_mount(&fatfs,rootPath,1);
     if(fresult)
     {
         usart_sendString(USART2,"挂载文件系统失败");
     }
-    fresult = f_open(&newfile, "0:music4.wav",FA_READ);
+    fresult = f_open(&newfile, filePath,FA_READ);
 
     if(fresult)
     {
@@ -164,7 +188,7 @@ void TIM2_IRQHandler()
         sprintf(sss,"%d",speedBytes/1024);
         usart_sendString(USART2,"speed: ");
         usart_sendString(USART2, sss);
-        usart_sendString(USART2, " kByte/s");
+        usart_sendString(USART2, " kByte/s \r\n");
         speedBytes = 0;
         TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
     }
