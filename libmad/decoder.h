@@ -49,11 +49,20 @@ struct mad_decoder {
     int out;
   } async;
 
-  struct {
-    struct mad_stream stream;
-    struct mad_frame frame;
-    struct mad_synth synth;
-  } *sync;
+//  struct {
+//    struct mad_stream stream;
+//    struct mad_frame frame;
+//    struct mad_synth synth;
+//  } *sync;
+  
+  
+  struct sync_t {
+      struct mad_stream stream; // definito main_data_t un array di circa 4K
+      struct mad_frame frame;
+      struct mad_synth synth;
+    };
+  
+  struct sync_t *sync;
 
   void *cb_data;
 

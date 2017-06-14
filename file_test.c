@@ -58,7 +58,7 @@ bool writFile(char *rootPath, char *fileName, char* fileBuff, uint32_t buffSize)
                     buffSize,			/* Number of bytes to write */
                     &fnum			/* Pointer to number of bytes written */
               );
-          usart_sendString(USART2,"创建文件成功");
+          usart_sendString(USART2,"> 创建文件成功 \r\n");
           f_close(&newfile);
           return true;
       }

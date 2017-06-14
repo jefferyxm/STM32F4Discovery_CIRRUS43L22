@@ -405,7 +405,7 @@ void USBH_USR_OverCurrentDetected (void)
 * @param  None
 * @retval Status
 */
-int MpegAudioDecoder(FIL *InputFp, FIL *OutputFp);
+int MpegAudioDecoder(FIL *InputFp);
 int USBH_USR_MSC_Application(void)
 {
   FRESULT res;
@@ -480,7 +480,7 @@ int USBH_USR_MSC_Application(void)
           break;
         
       case USH_USR_FS_PLAY:
-          usart_debugMessage("> ²¥·ÅÒôÀÖ\r\n");
+          usart_debugMessage("> play \r\n");//
           /*Key B3 in polling*/
           //while(HCD_IsDeviceConnected(&USB_OTG_Core)) 
           {
@@ -502,22 +502,13 @@ int USBH_USR_MSC_Application(void)
             //playWAV(USBH_Path,"music3.wav",0);
             
             
-            fresult = f_open(&newfile2, "0:123.wav",FA_CREATE_ALWAYS|FA_WRITE);
-            fresult = f_open(&newfile, "0:music4.mp3",FA_READ);
+            
+            fresult = f_open(&newfile, "0:2.mp3",FA_READ);            
             if(fresult==FR_OK)
             {
-                
-            }
-            
-            
-            if(fresult==FR_OK)
-            {
-                MpegAudioDecoder(&newfile,&newfile2);
+                MpegAudioDecoder(&newfile);
             }
 
-            //MpegAudioDecoder(&newfile,&newfile2);
-            //play();
-            //read_speedtest();
         }
         break;
       default: break;

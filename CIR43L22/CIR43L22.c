@@ -33,12 +33,12 @@ void Init_CIR43L22()
 	SlaveMode();  // data formate iis formate
 	//IIC_WRITE(Playbackctl1, 0xc0);  // headphone gain 1.0, with 
 	//IIC_WRITE(PlaybackCtl2, 0x00);
-	IIC_WRITE(MasterAvol, 0xe1); 
-	IIC_WRITE(MasterBvol, 0xe1);
+	IIC_WRITE(MasterAvol, 0x01); 
+	IIC_WRITE(MasterBvol, 0x01);
         
         PowerUp();
         
-        IIC_WRITE(PCMAvol,0x53);
+        IIC_WRITE(PCMAvol,0x53);  //53
         IIC_WRITE(PCMBvol,0x53);
         
 	

@@ -297,6 +297,9 @@ int free_bitrate(struct mad_stream *stream, struct mad_header const *header)
  * NAME:	header->decode()
  * DESCRIPTION:	read the next frame header from the stream
  */
+
+char a,b,c,d;
+int aa,bb,cc,dd;
 int mad_header_decode(struct mad_header *header, struct mad_stream *stream)
 {
   register unsigned char const *ptr, *end;
@@ -342,7 +345,7 @@ int mad_header_decode(struct mad_header *header, struct mad_stream *stream)
       /* mark point where frame sync word was expected */
       stream->this_frame = ptr;
       stream->next_frame = ptr + 1;
-
+      
       stream->error = MAD_ERROR_LOSTSYNC;
       goto fail;
     }

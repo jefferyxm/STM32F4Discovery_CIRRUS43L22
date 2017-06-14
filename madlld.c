@@ -53,6 +53,7 @@
 #include "ff.h"
 #include "stm32f4xx.h"
 #include "bstdfile.h"
+#include "board_init.h"
 
 /* Should we use getopt() for command-line arguments parsing? */
 #if (defined(unix) || defined (__unix__) || defined(__unix) || \
@@ -292,15 +293,17 @@ static void ApplyFilter(struct mad_frame *Frame)
 /****************************************************************************
  * Main decoding loop. This is where mad is used.							*
  ****************************************************************************/
-#define INPUT_BUFFER_SIZE	(2*1024)//(1024U)//(8192)  
-#define OUTPUT_BUFFER_SIZE	8192//(5120U)//8192U	  
+#define INPUT_BUFFER_SIZE	(1028)//(1024U)//(8192)  
+#define OUTPUT_BUFFER_SIZE	2048//(5120U)//8192U	 
+UINT outout = 2048;
 
 mad_timer_t			Timer;
-unsigned char		        InputBuffer[INPUT_BUFFER_SIZE+MAD_BUFFER_GUARD],
-                                        OutputBuffer[OUTPUT_BUFFER_SIZE],
-                                        *OutputPtr=OutputBuffer,
-                                        *GuardPtr=NULL;
-const unsigned char	        *OutputBufferEnd=OutputBuffer+OUTPUT_BUFFER_SIZE;
+unsigned char		        InputBuffer[INPUT_BUFFER_SIZE+MAD_BUFFER_GUARD];
+unsigned short                   OutputBuffer[2][OUTPUT_BUFFER_SIZE];
+unsigned short                  *OutputPtr=&OutputBuffer[0][0];
+unsigned char                   *GuardPtr=NULL;
+
+const unsigned short 	        *OutputBufferEnd=&OutputBuffer[0][0]+OUTPUT_BUFFER_SIZE;
 int					Status=0,
                                         i;
 unsigned long		        FrameCount=0;
@@ -318,10 +321,18 @@ UINT writesize;
 struct mad_stream	Stream;
 struct mad_frame	Frame;
 struct mad_synth	Synth;
+static FIL outFile;
+static FRESULT fresult;
 
+int readyBuffIndex = 0;
+int nowUsingBuff0 = 1;
+int nowUsingBuff1 = 0;
+int startPlay = 0;
 
-int MpegAudioDecoder(FIL *InputFp, FIL *OutputFp)
+int MpegAudioDecoder(FIL *InputFp)
 {
+
+        I2S3_TX_DMAInit(&OutputBuffer[0][0], &OutputBuffer[1][0], 2048);
 
 	/* First the structures used by libmad must be initialized. */
 	mad_stream_init(&Stream);
@@ -344,9 +355,7 @@ int MpegAudioDecoder(FIL *InputFp, FIL *OutputFp)
         
 	if(InputFp==NULL)
 	{
-//		fprintf(stderr,"%s: can't create a new bstdfile_t (%s).\n",
-//				ProgName,strerror(errno));
-		return(1);
+            return(1);
 	}
 
 	/* This is the decoding loop. */
@@ -394,10 +403,8 @@ int MpegAudioDecoder(FIL *InputFp, FIL *OutputFp)
 			 * reached we also leave the loop but the return status is
 			 * left untouched.
 			 */
-			//ReadSize=BstdRead(ReadStart,1,ReadSize,BstdFile);
                         
-                        tmp = ReadSize;
-                        fresult = f_read(InputFp, ReadStart, tmp, &ReadSize);
+                        fresult = f_read(InputFp, ReadStart, ReadSize, &readsize);
 			if(fresult!=FR_OK)
 			{
                               Status=1;
@@ -433,6 +440,7 @@ int MpegAudioDecoder(FIL *InputFp, FIL *OutputFp)
 				GuardPtr=ReadStart+ReadSize;
 				memset(GuardPtr,0,MAD_BUFFER_GUARD);
 				ReadSize+=MAD_BUFFER_GUARD;
+                                break;
 			}
 
 			/* Pipe the new buffer content to libmad's stream decoder
@@ -479,12 +487,9 @@ int MpegAudioDecoder(FIL *InputFp, FIL *OutputFp)
 				 * stream guard bytes. (See the comments marked {3}
 				 * supra for more informations about guard bytes.)
 				 */
-				if(Stream.error!=MAD_ERROR_LOSTSYNC ||
-				   Stream.this_frame!=GuardPtr)
+				if(Stream.error!=MAD_ERROR_LOSTSYNC ||Stream.this_frame!=GuardPtr)
 				{
-//					fprintf(stderr,"%s: recoverable frame level error (%s)\n",
-//							ProgName,MadErrorString(&Stream));
-					//fflush(stderr);
+
 				}
 				continue;
 			}
@@ -494,25 +499,10 @@ int MpegAudioDecoder(FIL *InputFp, FIL *OutputFp)
                         }
                         else
                         {
-//					fprintf(stderr,"%s: unrecoverable frame level error (%s).\n",
-//							ProgName,MadErrorString(&Stream));
                                 Status=1;
                                 break;
                         }	
 		}
-
-		/* The characteristics of the stream's first frame is printed
-		 * on stderr. The first frame is representative of the entire
-		 * stream.
-		 */
-		if(FrameCount==0) 
-                {
-//                    if(PrintFrameInfo(stderr,&Frame.header))
-//                    {
-//                            Status=1;
-//                            break;
-//                    }
-                }
 
 		/* Accounting. The computed frame duration is in the frame
 		 * header structure. It is expressed as a fixed point number
@@ -551,28 +541,47 @@ int MpegAudioDecoder(FIL *InputFp, FIL *OutputFp)
 
 			/* Left channel */
 			Sample=MadFixedToSshort(Synth.pcm.samples[0][i]);
-			*(OutputPtr++)=Sample>>8;
-			*(OutputPtr++)=Sample&0xff;
+//			*(OutputPtr++)=Sample>>8;
+//			*(OutputPtr++)=Sample&0xff;
+                        *(OutputPtr++)=Sample;
 
 			/* Right channel. If the decoded stream is monophonic then
 			 * the right output channel is the same as the left one.
 			 */
 			if(MAD_NCHANNELS(&Frame.header)==2)
-				Sample=MadFixedToSshort(Synth.pcm.samples[1][i]);
-			*(OutputPtr++)=Sample>>8;
-			*(OutputPtr++)=Sample&0xff;
-
+                        {
+                            Sample=MadFixedToSshort(Synth.pcm.samples[1][i]);
+                        }	
+//			*(OutputPtr++)=Sample>>8;
+//			*(OutputPtr++)=Sample&0xff;
+                        *(OutputPtr++)=Sample;
+                        
 			/* Flush the output buffer if it is full. */
 			if(OutputPtr==OutputBufferEnd)
 			{
-                                if(f_write(OutputFp,OutputBuffer,OUTPUT_BUFFER_SIZE,&writesize) != FR_OK)
-				{
-//					fprintf(stderr,"%s: PCM write error (%s).\n",
-//							ProgName,strerror(errno));
-					Status=2;
-					break;
-				}
-				OutputPtr=OutputBuffer;
+                            
+                            if(startPlay==0)
+                            {
+                                startDMA();  //开始播放
+                                startPlay = 1;
+                            }
+                          
+                            //等待前一个缓冲区数据播放完成
+                            if(readyBuffIndex==0)
+                            {
+                                while(nowUsingBuff1==1);  //buff1 正在使用，需要等待
+                            }
+                            else if(readyBuffIndex==1)
+                            {
+                                while(nowUsingBuff0==1);  //buff0 正在使用，需要等待
+                            }
+  
+                            if (++readyBuffIndex>=2)  //切换接收缓冲区
+                            {
+                                readyBuffIndex=0;
+                            }
+                            OutputPtr=&OutputBuffer[readyBuffIndex][0];
+                            OutputBufferEnd=&OutputBuffer[readyBuffIndex][0]+OUTPUT_BUFFER_SIZE;
 			}
 		}
 	}while(1);
@@ -585,25 +594,29 @@ int MpegAudioDecoder(FIL *InputFp, FIL *OutputFp)
 	/* Mad is no longer used, the structures that were initialized must
      * now be cleared.
 	 */
+        
+        stopDMA();
+        
+        startPlay = 0;
+        
 	mad_synth_finish(&Synth);
 	mad_frame_finish(&Frame);
 	mad_stream_finish(&Stream);
 
 	/* If the output buffer is not empty and no error occurred during
-     * the last write, then flush it.
+         * the last write, then flush it.
 	 */
-	if(OutputPtr!=OutputBuffer && Status!=2)
-	{
-		size_t	BufferSize=OutputPtr-OutputBuffer;
-
-		//if(fwrite(OutputBuffer,1,BufferSize,outputfile)!=BufferSize)
-                if(f_write(OutputFp,OutputBuffer,OUTPUT_BUFFER_SIZE,&writesize) != FR_OK)
-		{
-//			fprintf(stderr,"%s: PCM write error (%s).\n",
-//					ProgName,strerror(errno));
-			Status=2;
-		}
-	}
+//	if(OutputPtr!=OutputBuffer && Status!=2)
+//	{
+//		size_t	BufferSize=OutputPtr-OutputBuffer;
+//
+//                if(f_write(&outFile,OutputBuffer,OUTPUT_BUFFER_SIZE,&writesize) != FR_OK)
+//		{
+////			fprintf(stderr,"%s: PCM write error (%s).\n",
+////					ProgName,strerror(errno));
+//			Status=2;
+//		}
+//	}
 
 	/* Accounting report if no error occurred. */
 	if(!Status)

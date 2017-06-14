@@ -172,6 +172,9 @@ void play()
 
 
 
+extern int nowUsingBuff0;
+extern int nowUsingBuff1;
+
 
 void DMA1_Stream5_IRQHandler()
 {
@@ -184,10 +187,14 @@ void DMA1_Stream5_IRQHandler()
 		if(DMA1_Stream5->CR&(1<<19))   //当前DMA使用存储器1，只能更改存储器0的数据
 		{
 			bufferflag = 0;
+                        nowUsingBuff1 = 1;
+                        nowUsingBuff0 = 0;
 		}
 		else
 		{
 			bufferflag = 1;
+                        nowUsingBuff0 = 1;
+                        nowUsingBuff1 = 0;
 		}
 		DMA_ClearITPendingBit(DMA1_Stream5, DMA_IT_TCIF5);
 	}

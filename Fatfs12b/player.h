@@ -5,8 +5,11 @@
 #include "main.h"
 #include "stdlib.h"
 
-void player();
+void play();
 void playWAV(char *rootPath, char *fileName,char cmd);
+void startDMA();
+void stopDMA();
+//void DMA1_Stream5_IRQHandler();
 
 typedef __packed struct 
 {

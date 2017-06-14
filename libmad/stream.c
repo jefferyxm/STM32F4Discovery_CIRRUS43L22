@@ -30,6 +30,8 @@
 # include "bit.h"
 # include "stream.h"
 
+main_data_t MainData;
+
 /*
  * NAME:	stream->init()
  * DESCRIPTION:	initialize stream struct
