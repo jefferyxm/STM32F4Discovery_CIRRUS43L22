@@ -96,7 +96,6 @@ void playWAV(char *rootPath, char *fileName,char cmd)
 
 void play()
 { 
-    
     //fresult = f_mount(&fatfs,"1:",1);
     fresult = f_open(&newfile, "0:\music3.wav",FA_READ);
 	if(fresult==FR_OK)

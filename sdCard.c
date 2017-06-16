@@ -52,7 +52,7 @@ int MSD0_Init(void)
         #endif
 	  / * FATFS error flag * /
         return -1;
-    }
+    }CCM-SRAMCCM-SRAM
     */
     /* Power on and delay some times */	
     /*

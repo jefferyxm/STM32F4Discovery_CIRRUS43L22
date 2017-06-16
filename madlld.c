@@ -293,53 +293,46 @@ static void ApplyFilter(struct mad_frame *Frame)
 /****************************************************************************
  * Main decoding loop. This is where mad is used.							*
  ****************************************************************************/
-#define INPUT_BUFFER_SIZE	(1028)//(1024U)//(8192)  
-#define OUTPUT_BUFFER_SIZE	2048//(5120U)//8192U	 
-UINT outout = 2048;
-
-mad_timer_t			Timer;
-unsigned char		        InputBuffer[INPUT_BUFFER_SIZE+MAD_BUFFER_GUARD];
-unsigned short                   OutputBuffer[2][OUTPUT_BUFFER_SIZE];
-unsigned short                  *OutputPtr=&OutputBuffer[0][0];
-unsigned char                   *GuardPtr=NULL;
-
-const unsigned short 	        *OutputBufferEnd=&OutputBuffer[0][0]+OUTPUT_BUFFER_SIZE;
-int					Status=0,
-                                        i;
-unsigned long		        FrameCount=0;
-
-static FRESULT fresult;
-
 static FATFS fatfs;
-FIL fileT;
+static FRESULT fresult;
 
 size_t		ReadSize,Remaining,tmp;
 unsigned char	*ReadStart;
-UINT readsize;
-UINT writesize;
+UINT            readsize,writesize;
 
 struct mad_stream	Stream;
 struct mad_frame	Frame;
 struct mad_synth	Synth;
-static FIL outFile;
-static FRESULT fresult;
 
-int readyBuffIndex = 0;
-int nowUsingBuff0 = 1;
-int nowUsingBuff1 = 0;
-int startPlay = 0;
+int             readyBuffIndex = 0;
+int             nowUsingBuff0 = 1;
+int             nowUsingBuff1 = 0;
+int             startPlay = 0;
+
+#define INPUT_BUFFER_SIZE	(1024*8)//(1024U)//(8192)  
+#define OUTPUT_BUFFER_SIZE	(2048*2)//(5120U)//8192U
+
+unsigned char		        InputBuffer[INPUT_BUFFER_SIZE+MAD_BUFFER_GUARD];
+unsigned short                   OutputBuffer[2][OUTPUT_BUFFER_SIZE];
+unsigned short                  *OutputPtr=&OutputBuffer[0][0];
+unsigned char                   *GuardPtr=NULL;
+unsigned short 	                *OutputBufferEnd=&OutputBuffer[0][0]+OUTPUT_BUFFER_SIZE;
+mad_timer_t			Timer;
 
 int MpegAudioDecoder(FIL *InputFp)
 {
-
-        I2S3_TX_DMAInit(&OutputBuffer[0][0], &OutputBuffer[1][0], 2048);
-
+        
+        int				Status=0,i;
+        unsigned long		        FrameCount=0;
+        
 	/* First the structures used by libmad must be initialized. */
 	mad_stream_init(&Stream);
 	mad_frame_init(&Frame);
 	mad_synth_init(&Synth);
 	mad_timer_reset(&Timer);
 
+        I2S3_TX_DMAInit(&OutputBuffer[0][0], &OutputBuffer[1][0], OUTPUT_BUFFER_SIZE);
+        
 	/* Decoding options can here be set in the options field of the
 	 * Stream structure.
 	 */
@@ -541,8 +534,8 @@ int MpegAudioDecoder(FIL *InputFp)
 
 			/* Left channel */
 			Sample=MadFixedToSshort(Synth.pcm.samples[0][i]);
-//			*(OutputPtr++)=Sample>>8;
-//			*(OutputPtr++)=Sample&0xff;
+			//*(OutputPtr++)=Sample>>8;
+			//*(OutputPtr++)=Sample&0xff;
                         *(OutputPtr++)=Sample;
 
 			/* Right channel. If the decoded stream is monophonic then
@@ -552,8 +545,8 @@ int MpegAudioDecoder(FIL *InputFp)
                         {
                             Sample=MadFixedToSshort(Synth.pcm.samples[1][i]);
                         }	
-//			*(OutputPtr++)=Sample>>8;
-//			*(OutputPtr++)=Sample&0xff;
+			//*(OutputPtr++)=Sample>>8;
+			//*(OutputPtr++)=Sample&0xff;
                         *(OutputPtr++)=Sample;
                         
 			/* Flush the output buffer if it is full. */
@@ -580,20 +573,12 @@ int MpegAudioDecoder(FIL *InputFp)
                             {
                                 readyBuffIndex=0;
                             }
+
                             OutputPtr=&OutputBuffer[readyBuffIndex][0];
                             OutputBufferEnd=&OutputBuffer[readyBuffIndex][0]+OUTPUT_BUFFER_SIZE;
 			}
 		}
 	}while(1);
-
-	/* The input file was completely read; the memory allocated by our
-	 * reading module must be reclaimed.
-	 */
-	//BstdFileDestroy(BstdFile);
-        
-	/* Mad is no longer used, the structures that were initialized must
-     * now be cleared.
-	 */
         
         stopDMA();
         
@@ -602,48 +587,6 @@ int MpegAudioDecoder(FIL *InputFp)
 	mad_synth_finish(&Synth);
 	mad_frame_finish(&Frame);
 	mad_stream_finish(&Stream);
-
-	/* If the output buffer is not empty and no error occurred during
-         * the last write, then flush it.
-	 */
-//	if(OutputPtr!=OutputBuffer && Status!=2)
-//	{
-//		size_t	BufferSize=OutputPtr-OutputBuffer;
-//
-//                if(f_write(&outFile,OutputBuffer,OUTPUT_BUFFER_SIZE,&writesize) != FR_OK)
-//		{
-////			fprintf(stderr,"%s: PCM write error (%s).\n",
-////					ProgName,strerror(errno));
-//			Status=2;
-//		}
-//	}
-
-	/* Accounting report if no error occurred. */
-	if(!Status)
-	{
-		char	Buffer[80];
-
-		/* The duration timer is converted to a human readable string
-		 * with the versatile, but still constrained mad_timer_string()
-		 * function, in a fashion not unlike strftime(). The main
-		 * difference is that the timer is broken into several
-		 * values according some of it's arguments. The units and
-		 * fracunits arguments specify the intended conversion to be
-		 * executed.
-		 *
-		 * The conversion unit (MAD_UNIT_MINUTES in our example) also
-		 * specify the order and kind of conversion specifications
-		 * that can be used in the format string.
-		 *
-		 * It is best to examine libmad's timer.c source-code for details
-		 * of the available units, fraction of units, their meanings,
-		 * the format arguments, etc.
-		 */
-		mad_timer_string(Timer,Buffer,"%lu:%02lu.%03u",
-						 MAD_UNITS_MINUTES,MAD_UNITS_MILLISECONDS,0);
-		fprintf(stderr,"%s: %lu frames decoded (%s).\n",
-				ProgName,FrameCount,Buffer);
-	}
 
 	/* That's the end of the world (in the H. G. Wells way). */
 	return(Status);
@@ -669,46 +612,6 @@ static int ParseArgs(int argc, char * const argv[])
 	
 }
 
-/****************************************************************************
- * Program entry point.														*
- ****************************************************************************/
-//int main(int argc, char *argv[])
-//{
-//	char	*cptr;
-//	int		Status;
-//
-//	/* Keep this for error messages. */
-//	cptr=strrchr(argv[0],'/');
-//	if(cptr==NULL)
-//		ProgName=argv[0];
-//	else
-//		ProgName=cptr+1;
-//
-//
-//	/* Decode stdin to stdout. */
-//	Status=MpegAudioDecoder(stdin,stdout);
-//	if(Status)
-//		fprintf(stderr,"%s: an error occurred during decoding.\n",ProgName);
-//
-//	/* All done. */
-//	return(Status);
-//}
-
-/*  LocalWords:  BUFLEN HTAB madlld libmad bstdfile getopt subband ParseArgs JS
- */
-/*  LocalWords:  DoFilter subbands errorstr bitrate scalefactor libmad's lu kb
- */
-/*  LocalWords:  SWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFF FRACBITS madplay fread synth
- */
-/*  LocalWords:  ApplyFilter strftime fracunits atten tSets tRequest tThe tas
- */
-/*  LocalWords:  ttransmitted unix todouble tofixed
- */
-/*
- * Local Variables:
- * tab-width: 4
- * End:
- */
 
 /****************************************************************************
  * End of file madlld.c														*

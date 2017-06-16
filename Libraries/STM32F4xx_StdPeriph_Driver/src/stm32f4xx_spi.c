@@ -422,7 +422,7 @@ void I2S_Init(SPI_TypeDef* SPIx, I2S_InitTypeDef* I2S_InitStruct)
     
     /* Get the PLLM value */
     pllm = (uint32_t)(RCC->PLLCFGR & RCC_PLLCFGR_PLLM);
-
+    
     if((RCC->PLLCFGR & RCC_PLLCFGR_PLLSRC) == RCC_PLLCFGR_PLLSRC_HSE)
     {
       /* Get the I2S source clock value */
@@ -457,6 +457,7 @@ void I2S_Init(SPI_TypeDef* SPIx, I2S_InitTypeDef* I2S_InitStruct)
    
     /* Get the Mask for the Odd bit (SPI_I2SPR[8]) register */
     i2sodd = (uint16_t) (i2sodd << 8);
+
   }
 
   /* Test if the divider is 1 or 0 or greater than 0xFF */

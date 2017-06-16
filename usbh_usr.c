@@ -501,13 +501,13 @@ int USBH_USR_MSC_Application(void)
             //≤•∑≈“Ù¿÷
             //playWAV(USBH_Path,"music3.wav",0);
             
-            
-            
-            fresult = f_open(&newfile, "0:2.mp3",FA_READ);            
+
+            fresult = f_open(&newfile, "0:4.mp3",FA_READ);            
             if(fresult==FR_OK)
             {
                 MpegAudioDecoder(&newfile);
             }
+            f_close(&newfile);
 
         }
         break;

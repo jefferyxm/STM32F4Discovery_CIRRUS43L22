@@ -48,20 +48,19 @@ __ALIGN_BEGIN USB_OTG_CORE_HANDLE      USB_OTG_Core __ALIGN_END;
 uint64_t capacity;
 extern MSD_CARDINFO SD0_CardInfo;
 
-
-
 char USBH_Path[4];  
 char MSD_Path[4];
 extern Diskio_drvTypeDef  USBH_Driver;
 extern Diskio_drvTypeDef  MSD_Driver;
 
-
+RCC_ClocksTypeDef rcc_clock;
 int main(void)
 {
     SystemInit();
     bsp_led_init();
     perip_uart_init();
-    
+    led3on();
+    led4on();
     perip_I2C1_init();
 
 //    TIM_init();
@@ -77,6 +76,9 @@ int main(void)
 
     Init_CIR43L22();
     I2S3_Init();
+    
+    
+    RCC_GetClocksFreq(&rcc_clock);
         
     USBH_Init(&USB_OTG_Core, 
 #ifdef USE_USB_OTG_FS  
@@ -89,7 +91,6 @@ int main(void)
             &USR_cb);
 
     FATFS_LinkDriver(&USBH_Driver, USBH_Path);
-
     while(1)
     {
        USBH_Process(&USB_OTG_Core, &USB_Host);

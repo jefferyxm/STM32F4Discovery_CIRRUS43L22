@@ -129,7 +129,11 @@ void read_speedtest(char *rootPath, char *fileName)
     TIM_TimeBaseInitTypeDef Timer2_InitStruct;
     Timer2_InitStruct.TIM_ClockDivision = TIM_CKD_DIV1;
     Timer2_InitStruct.TIM_CounterMode = TIM_CounterMode_Up;
+#if defined(F407Discovery)
+    Timer2_InitStruct.TIM_Period = 168000-1;
+#else
     Timer2_InitStruct.TIM_Period = 84000-1;
+#endif
     Timer2_InitStruct.TIM_Prescaler = 1000-1;
     TIM_TimeBaseInit(TIM2, &Timer2_InitStruct);
 

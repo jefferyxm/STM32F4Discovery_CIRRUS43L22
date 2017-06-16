@@ -338,7 +338,7 @@ void I2S3_Init()
     //÷ÿ–¬≈‰÷√iispll ±÷”
 
     RCC_I2SCLKConfig(RCC_I2S2CLKSource_PLLI2S);
-    RCC_PLLI2SConfig(271, 2);
+    RCC_PLLI2SConfig(271, 2);    
     RCC_PLLI2SCmd(ENABLE);
 
     for(int n = 0; n<500; n++)
@@ -358,11 +358,60 @@ void I2S3_Init()
     I2S_InitStruct.I2S_MCLKOutput = I2S_MCLKOutput_Enable;
     I2S_InitStruct.I2S_CPOL = I2S_CPOL_Low;
     I2S_Init(SPI3, &I2S_InitStruct);
-
+    
+    
     I2S_Cmd(SPI3, ENABLE);
 }
 
 void I2S3_TX_DMAInit(const uint16_t *buffer0, const uint16_t *buffer1, const uint32_t num)
+{
+    /* I2S3 DMA  À´ª∫≥Â*/
+    NVIC_InitTypeDef NVIC_InitStruct;
+    DMA_InitTypeDef DMA_InitStruct;
+
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
+    DMA_DeInit(DMA1_Stream5);
+    while(DMA_GetCmdStatus(DMA1_Stream5) != DISABLE);
+
+    DMA_ClearITPendingBit(DMA1_Stream5, 
+                            DMA_IT_FEIF5|DMA_IT_DMEIF5|DMA_IT_HTIF5|DMA_IT_TCIF5|DMA_IT_TEIF5);
+
+    DMA_InitStruct.DMA_Channel = DMA_Channel_0;
+    DMA_InitStruct.DMA_PeripheralBaseAddr = (uint32_t)&SPI3->DR;//(uint32_t)&SPI3->DR;
+
+    DMA_InitStruct.DMA_Memory0BaseAddr = (uint32_t)buffer0;
+    DMA_InitStruct.DMA_DIR = DMA_DIR_MemoryToPeripheral;
+
+    DMA_InitStruct.DMA_BufferSize = num;
+    DMA_InitStruct.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+    DMA_InitStruct.DMA_MemoryInc = DMA_MemoryInc_Enable;
+    DMA_InitStruct.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+    DMA_InitStruct.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+    DMA_InitStruct.DMA_Mode = DMA_Mode_Normal;
+    DMA_InitStruct.DMA_Priority = DMA_Priority_High;
+    DMA_InitStruct.DMA_FIFOMode = DMA_FIFOMode_Disable;
+    //DMA_InitStruct.DMA_FIFOThreshold = DMA_FIFOThreshold_1QuarterFull;
+    DMA_InitStruct.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+    DMA_InitStruct.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+    DMA_Init(DMA1_Stream5, &DMA_InitStruct);
+
+    //DMA_DoubleBufferModeConfig(DMA1_Stream5, (uint32_t)buffer0, DMA_Memory_0);
+    DMA_DoubleBufferModeConfig(DMA1_Stream5, (uint32_t)buffer1, DMA_Memory_1);
+
+    DMA_DoubleBufferModeCmd(DMA1_Stream5, ENABLE);
+
+    DMA_ITConfig(DMA1_Stream5, DMA_IT_TC, ENABLE);
+    SPI_I2S_DMACmd(SPI3, SPI_I2S_DMAReq_Tx, ENABLE);
+
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+    NVIC_InitStruct.NVIC_IRQChannel = DMA1_Stream5_IRQn;
+    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStruct.NVIC_IRQChannelSubPriority = 1;
+    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStruct);
+}
+
+void I2S3_TX_DMAInit_Byte(const uint8_t *buffer0, const uint8_t *buffer1, const uint32_t num)
 {
     /* I2S3 DMA  À´ª∫≥Â*/
     NVIC_InitTypeDef NVIC_InitStruct;

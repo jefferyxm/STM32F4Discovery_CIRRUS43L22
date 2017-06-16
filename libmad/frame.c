@@ -298,8 +298,7 @@ int free_bitrate(struct mad_stream *stream, struct mad_header const *header)
  * DESCRIPTION:	read the next frame header from the stream
  */
 
-char a,b,c,d;
-int aa,bb,cc,dd;
+
 int mad_header_decode(struct mad_header *header, struct mad_stream *stream)
 {
   register unsigned char const *ptr, *end;

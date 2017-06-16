@@ -118,7 +118,7 @@
    In this case, these drivers will not be included and the application code will 
    be based on direct access to peripherals registers 
    */
-  /*#define USE_STDPERIPH_DRIVER */
+  #define USE_STDPERIPH_DRIVER 
 #endif /* USE_STDPERIPH_DRIVER */
 
 /**
@@ -131,7 +131,11 @@
 #if defined(STM32F40_41xxx) || defined(STM32F427_437xx)  || defined(STM32F429_439xx) || defined(STM32F401xx) || \
     defined(STM32F410xx) || defined(STM32F411xE) || defined(STM32F469_479xx)
  #if !defined  (HSE_VALUE) 
-  #define HSE_VALUE    ((uint32_t)12000000) /*!< Value of the External oscillator in Hz */
+  #if defined(F407Discovery)
+    #define HSE_VALUE    ((uint32_t)8000000) /*!< Value of the External oscillator in Hz */
+  #else
+    #define HSE_VALUE    ((uint32_t)12000000) /*!< Value of the External oscillator in Hz */
+  #endif
  #endif /* HSE_VALUE */
 #elif defined(STM32F446xx)
  #if !defined  (HSE_VALUE) 
