@@ -460,3 +460,19 @@ void I2S3_TX_DMAInit_Byte(const uint8_t *buffer0, const uint8_t *buffer1, const 
 }
 
 
+u8 RNG_Init(void)
+{
+       u16 retry=0;
+       RCC_AHB2PeriphClockCmd(RCC_AHB2Periph_RNG, ENABLE); //开启RNG时钟  
+       RNG_Cmd(ENABLE);  //使能RNG
+       while(RNG_GetFlagStatus(RNG_FLAG_DRDY)==RESET&&retry<10000)//等待就绪
+       {   
+         retry++;  
+         MARK_SYSTICK();
+         WAIT_SYSTICK(US2SYSTICK(100));
+       }
+       if(retry>=10000)return 1;//随机数产生器工作不正常
+       return 0;
+}
+
+

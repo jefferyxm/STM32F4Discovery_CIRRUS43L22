@@ -57,7 +57,9 @@ RCC_ClocksTypeDef rcc_clock;
 int main(void)
 {
     SystemInit();
+    START_SYSTICK();
     bsp_led_init();
+    RNG_Init();  //随机数发生器
     perip_uart_init();
     led3on();
     led4on();

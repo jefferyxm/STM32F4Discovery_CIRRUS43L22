@@ -18,4 +18,7 @@ uint8_t spi1_sendByte(uint8_t data);
 
 uint8_t spi1_readByte(void);
 
+u32 RNG_Get_RandomNum(void);
+
+int RNG_Get_RandomRange(int min,int max);
 #endif

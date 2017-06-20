@@ -16,6 +16,8 @@ void I2S3_Init();
 void I2S3_TX_DMAInit(const uint16_t *buffer0, const uint16_t *buffer1, const uint32_t num);
 void I2S3_TX_DMAInit_Byte(const uint8_t *buffer0, const uint8_t *buffer1, const uint32_t num);
 
+u8 RNG_Init(void);
+
 #define DISCOVERY 1
 #ifdef DISCOVERY
 #define led3on() GPIOD->BSRRL = GPIO_Pin_13

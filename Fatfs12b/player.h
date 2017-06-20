@@ -5,8 +5,9 @@
 #include "main.h"
 #include "stdlib.h"
 
-void play();
-void playWAV(char *rootPath, char *fileName,char cmd);
+void play(char *rootPath, char *fileName,char cmd);
+void playWAV(char *filePath, char cmd);
+int  playMP3(char *filePath, char cmd);
 void startDMA();
 void stopDMA();
 //void DMA1_Stream5_IRQHandler();

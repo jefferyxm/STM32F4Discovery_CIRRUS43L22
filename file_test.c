@@ -83,9 +83,13 @@ void readFile(char *rootPath, char *fileName, char* fileBuff, uint32_t buffSize)
     {
             usart_sendString(USART2,"打开文件成功");
             fresult = f_read(&newfile, fileBuff, buffSize, &fnum);
-            usart_sendMessage(USART2, fileBuff, fnum);
-            f_close(&newfile);
-            usart_sendString(USART2,"文件读取完成");
+            if(fresult==FR_OK)
+            {
+                usart_sendMessage(USART2, fileBuff, fnum);
+                f_close(&newfile);
+                usart_sendString(USART2,"文件读取完成");
+            }
+            
     }      
     else
     {

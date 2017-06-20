@@ -226,6 +226,9 @@
         <name>$PROJ_DIR$\..\Fatfs12b\option\cc936.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\Fatfs12b\option\cc949.c</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\Fatfs12b\option\ccsbcs.c</name>
       </file>
       <file>

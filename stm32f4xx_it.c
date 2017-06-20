@@ -183,7 +183,6 @@ void OTG_HS_IRQHandler(void)
 
 
 
-
 /******************************************************************************/
 /*                 STM32F4xx Peripherals Interrupt Handlers                   */
 /*  Add here the Interrupt Handler for the used peripheral(s) (PPP), for the  */

@@ -1,18 +1,28 @@
 #include "player.h"
 #include "string.h"
-#include "perip_func.h"
-#include "ff.h"
 #include "diskio.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>   
+#include "mad.h"
+#include "libmad_config.h"
 
-WavHead wavhead;
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <math.h>   /* for pow() and log10() */
+#include "mad.h"
+#include "libmad_config.h"
+#include "ff.h"
+#include "stm32f4xx.h"
+#include "board_init.h"
+       
+          
+int MpegAudioDecoder(FIL *InputFp);
 void (*I2S_DMA_Tx_Callback)(void);
-uint16_t buffer0[257],buffer1[257];//不要管我，我是强迫症。。。
-uint8_t bufferflag = 0;
-uint8_t isread = 0;
 
 static FRESULT fresult;
-static FIL newfile;
-
 static UINT fnum;
 
 
@@ -26,12 +36,14 @@ void stopDMA()
     DMA_Cmd(DMA1_Stream5, DISABLE);
 }
 
-FIL wavFile;
-void playWAV(char *rootPath, char *fileName,char cmd)
+static FIL wavFile;
+WavHead wavhead;
+uint16_t buffer0[257],buffer1[257];
+uint8_t bufferflag = 0;
+uint8_t isread = 0;
+
+void playWAV(char *filePath, char cmd)
 {
-    char filePath[50] = {0};
-    strcat(filePath,rootPath);
-    strcat(filePath,fileName);
     fresult = f_open(&wavFile, filePath ,FA_READ);
     if(fresult==FR_OK)
     {
@@ -94,86 +106,56 @@ void playWAV(char *rootPath, char *fileName,char cmd)
 }
 
 
-void play()
-{ 
-    //fresult = f_mount(&fatfs,"1:",1);
-    fresult = f_open(&newfile, "0:\music3.wav",FA_READ);
-	if(fresult==FR_OK)
-	{
-		usart_sendString(USART2,"打开music0文件成功");
-                //读取wave音频头信息
-		fresult = f_read(&newfile, &wavhead, sizeof(wavhead), &fnum);
-                
-                //先读取一段音频信息到缓冲区
-                fresult = f_read(&newfile, (uint16_t *)buffer0, 512,&fnum);
-                fresult = f_read(&newfile, (uint16_t *)buffer1, 512,&fnum);
-                
-                I2S3_TX_DMAInit(buffer0, buffer1, 256);
-                
-                
-                startDMA();  // 开启dma传输，开始播放了  先使用存储器0播放
-                int i  = 0;
-                while(1)
-                {
-                    if(isread==1)
-                    {
-                        if(bufferflag==0)  // buffer0 空闲  //   
-                        {
-                            fresult = f_read(&newfile, (uint16_t *)buffer0, 512,&fnum);
-                            //usart_sendByte(USART2,(uint8_t)(buffer0[0]&0xff));
-                        }
-                        else
-                        {
-                            fresult = f_read(&newfile, (uint16_t *)buffer1, 512,&fnum);
-                            //usart_sendString(USART2,"XXXX");
-                        }
-                        isread = 0;
-                            
-                        if(fresult!=FR_OK)
-                        {
-                                usart_sendString(USART2,"播放出错1");
-                                stopDMA();
-                                f_close(&newfile);
-                        }                             
-                     }
-                     if(f_eof(&newfile))  // 打开一个新的文件
-                     {
-                        i++;
-                        stopDMA();
-                        f_close(&newfile);
-                        if(i==0)
-                          fresult = f_open(&newfile, "0:music3.wav",FA_READ);
-                        else if(i==1)
-                          fresult = f_open(&newfile, "0:music4.wav",FA_READ);
-                        else if(i==2)
-                        {
-                            fresult = f_open(&newfile, "0:music5.wav",FA_READ);
-                            i=0;
-                        }
-                        fresult = f_read(&newfile, &wavhead, sizeof(wavhead), &fnum);
-                
-                        //先读取一段音频信息到缓冲区
-                        fresult = f_read(&newfile, (uint16_t *)buffer0, 512,&fnum);
-                        fresult = f_read(&newfile, (uint16_t *)buffer1, 512,&fnum);
-                        
-                        I2S3_TX_DMAInit(buffer0, buffer1, 256);  //开始播放
-                        startDMA(); 
-                     }
-		}
-		
-                //f_close(&newfile);
-                //usart_sendString(USART2,"文件读取完成");
-	}
-            
-        else
-            usart_sendString(USART2,"打开文件失败");
+FIL mp3File;
+int playMP3(char *filePath, char cmd)
+{
+    fresult = f_open(&mp3File, filePath ,FA_READ);
+    if(fresult==FR_OK)
+    {
+        usart_debugMessage("打开音乐文件 ");
+        usart_debugMessage(filePath);
+        usart_debugMessage(" 成功\r\n");
+    }
+    else
+    {
+       usart_debugMessage("打开音乐文件失败\r\n") ;
+       return 1;
+    }
+    
+    MpegAudioDecoder(&mp3File);
+    
+    return 0;
 }
 
 
+void play(char *rootPath, char *fileName, char cmd)
+{ 
+    char filePath[50] = {0};
+    char *posPtr = NULL;
+    strcat(filePath,rootPath);
+    strcat(filePath,fileName);
+    posPtr = strchr(filePath,'.');
+    if(strcmp(posPtr,".wav")==0)   //wav 文件
+    {
+        usart_debugMessage("播放wav文件\r\n");
+        playWAV(filePath,cmd);
+        
+    }else if(strcmp(posPtr,".mp3")==0)
+    {
+        usart_debugMessage("播放MP3文件\r\n");
+        int result = playMP3(filePath,cmd);
+        
+    }else
+    {
+        usart_debugMessage("不支持的文件类型\r\n");
+    }
+}
 
+
+//extern uint8_t bufferflag;
+//extern uint8_t isread;
 extern int nowUsingBuff0;
 extern int nowUsingBuff1;
-
 
 void DMA1_Stream5_IRQHandler()
 {
@@ -195,6 +177,8 @@ void DMA1_Stream5_IRQHandler()
                         nowUsingBuff0 = 1;
                         nowUsingBuff1 = 0;
 		}
-		DMA_ClearITPendingBit(DMA1_Stream5, DMA_IT_TCIF5);
+		DMA_ClearITPendingBit(DMA1_Stream5, DMA_IT_TCIF5|DMA_IT_FEIF5|DMA_IT_DMEIF5|DMA_IT_TEIF5|DMA_IT_HTIF5);
 	}
 }
+
+

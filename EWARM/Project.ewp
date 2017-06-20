@@ -1976,11 +1976,19 @@
         <name>$PROJ_DIR$\..\Fatfs12b\option\cc936.c</name>
         <excluded>
           <configuration>STM32F401xx</configuration>
+        </excluded>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\Fatfs12b\option\cc949.c</name>
+        <excluded>
           <configuration>stm32f407xx</configuration>
         </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\Fatfs12b\option\ccsbcs.c</name>
+        <excluded>
+          <configuration>stm32f407xx</configuration>
+        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\Fatfs12b\diskio.c</name>
@@ -2376,7 +2384,6 @@
       <name>$PROJ_DIR$\..\Libraries\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_rng.c</name>
       <excluded>
         <configuration>STM32F401xx</configuration>
-        <configuration>stm32f407xx</configuration>
       </excluded>
     </file>
     <file>

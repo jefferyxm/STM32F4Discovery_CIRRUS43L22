@@ -33,6 +33,9 @@
 #include "usbh_msc_scsi.h"
 #include "usbh_msc_bot.h"
 #include "player.h"
+#include "stdio.h"
+#include "file_test.h"
+    
 extern char USBH_Path[4];
 
 /** @addtogroup USBH_USER
@@ -81,10 +84,7 @@ uint8_t USBH_USR_ApplicationState = USH_USR_FS_INIT;
 uint8_t filenameString[15]  = {0};
 
 static FATFS fatfs;
-static FIL file;
-static FIL newfile;
-static FIL newfile2;
-static FRESULT fresult;
+
 uint8_t Image_Buf[IMAGE_BUFFER_SIZE];
 uint8_t line_idx = 0;   
 
@@ -253,10 +253,8 @@ void USBH_USR_DeviceSpeedDetected(uint8_t DeviceSpeed)
 */
 void USBH_USR_Device_DescAvailable(void *DeviceDesc)
 { 
-  USBH_DevDesc_TypeDef *hs;
-  hs = DeviceDesc;  
-  
-  
+  //USBH_DevDesc_TypeDef *hs;
+  //hs = DeviceDesc;  
   //LCD_UsrLog("VID : %04Xh\n" , (uint32_t)(*hs).idVendor); 
   //LCD_UsrLog("PID : %04Xh\n" , (uint32_t)(*hs).idProduct); 
 }
@@ -405,12 +403,18 @@ void USBH_USR_OverCurrentDetected (void)
 * @param  None
 * @retval Status
 */
-int MpegAudioDecoder(FIL *InputFp);
+static FIL newfile;
+static FRESULT fresult;
+static int itemCnt =1;
+char playlistBuff[4096] = {0};
 int USBH_USR_MSC_Application(void)
 {
-  FRESULT res;
   uint8_t writeTextBuff[] = "STM32 Connectivity line Host Demo application using FAT_FS   ";
   uint16_t bytesWritten, bytesToWrite;
+  int musicIndex = 0;
+  char musicName[256] = {0};
+  char musicIndexString[10] = {0};
+  char *posPtr = NULL;
   
   switch(USBH_USR_ApplicationState)
   {
@@ -436,9 +440,9 @@ int USBH_USR_MSC_Application(void)
       case USH_USR_FS_READLIST:
         
           //LCD_UsrLog((void *)MSG_ROOT_CONT);
-          Explore_Disk("0:/", 1);
+          Explore_Disk(USBH_Path, 1);
           line_idx = 0;   
-          USBH_USR_ApplicationState = USH_USR_FS_WRITEFILE;
+          USBH_USR_ApplicationState = USH_USR_FS_PLAY;
           
           break;
         
@@ -501,14 +505,41 @@ int USBH_USR_MSC_Application(void)
             //播放音乐
             //playWAV(USBH_Path,"music3.wav",0);
             
-
-            fresult = f_open(&newfile, "0:4.mp3",FA_READ);            
-            if(fresult==FR_OK)
+//            fresult = f_open(&newfile, "0:2.mp3",FA_READ);            
+//            if(fresult==FR_OK)
+//            {
+//                MpegAudioDecoder(&newfile);
+//            }
+//            f_close(&newfile);
+            
+            //随机生成要播放的条目
+            musicIndexString[0] = '&';
+            musicIndex = RNG_Get_RandomRange(1,itemCnt-1);
+            //musicIndex = 5;
+            sprintf(&musicIndexString[1],"%d",musicIndex);
+            strcat(musicIndexString,"*");
+            
+            //读取playlist,查找相应的条目
+            readFile(USBH_Path,"playlist.txt",playlistBuff,sizeof(playlistBuff));
+            posPtr = strstr(playlistBuff,musicIndexString);
+            if(posPtr != NULL)   //搜索到了
             {
-                MpegAudioDecoder(&newfile);
+                posPtr = posPtr + strlen(musicIndexString);
+                u8 i = 0;
+                do
+                {
+                    musicName[i] = *posPtr;
+                    i++;
+                    posPtr++;
+                }while(*posPtr!='#');
+                musicName[i] = '\0';
+                play(USBH_Path,musicName,0);
             }
-            f_close(&newfile);
-
+            else //没有搜索到
+            {
+                
+            }
+            
         }
         break;
       default: break;
@@ -522,21 +553,67 @@ int USBH_USR_MSC_Application(void)
 * @param  path: pointer to root path
 * @retval None
 */
+static FIL playList;
+static UINT fnum;
 static uint8_t Explore_Disk (char* path , uint8_t recu_level)
 {
-
-  FRESULT res;
-  FILINFO fno;
-  DIR dir;
-  char *fn;
-  char tmp[14];
-  
-  res = f_opendir(&dir, path);
-  if (res == FR_OK) 
-  {
+    FRESULT res;
+    FILINFO fno;
+    DIR dir;
+    UINT length;
+    char *fn;
+    char tmp[256] = {0};
+    char playlistPath[20] = {0};
+    char * posPtr = NULL;
     
-  }
-  return res;
+    strcat(playlistPath,path);
+    strcat(playlistPath,"playlist.txt");
+    fresult = f_open(&playList, playlistPath, FA_CREATE_ALWAYS|FA_WRITE);//创建播放列表文件
+    if(fresult!=FR_OK)
+    {
+        return 0;
+    }
+    
+    res = f_opendir(&dir, path);
+    if (res == FR_OK) {
+      while(HCD_IsDeviceConnected(&USB_OTG_Core)) 
+      {
+          res = f_readdir(&dir, &fno);
+          if (res != FR_OK || fno.fname[0] == 0) 
+          { 
+              break;
+          }
+          if (fno.fname[0] == '.')
+          {
+              continue;
+          }
+
+          fn = fno.fname;
+          tmp[0] = 0;
+          strcat(tmp, fn);
+          posPtr = strchr(tmp,'.');
+          if((strcmp(posPtr,".wav")==0)||(strcmp(posPtr,".mp3")==0))
+          {
+              tmp[0] = '&';
+              sprintf(&tmp[1],"%d",itemCnt);   //sprintf 会添加 '\0'
+              itemCnt++;
+              strcat(tmp, "*"); 
+              strcat(tmp, fn);
+              strcat(tmp, "#");
+              strcat(tmp, "\r\n");
+              
+              length = strlen(tmp) ;   //不写入 '\0'
+              fresult = f_write (
+                          &playList,			/* Pointer to the file object */
+                          tmp,	                        /* Pointer to the data to be written */
+                          length,			        /* Number of bytes to write */
+                          &fnum			        /* Pointer to number of bytes written */
+                         );
+          }
+      }
+    }
+    f_close(&playList);
+    return res;
 }
 
 

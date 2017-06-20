@@ -177,3 +177,15 @@ void usart_debugMessage(char*str)
       while(USART_GetFlagStatus(USART2,USART_FLAG_TC));	
 
 }
+
+u32 RNG_Get_RandomNum(void)
+{    
+    while(RNG_GetFlagStatus(RNG_FLAG_DRDY)==RESET);    //等待随机数就绪 
+    return RNG_GetRandomNumber();      
+}
+//生成[min,max]范围的随机数
+int RNG_Get_RandomRange(int min,int max)
+{
+   return RNG_Get_RandomNum()%(max-min+1) +min;
+}              
+              
