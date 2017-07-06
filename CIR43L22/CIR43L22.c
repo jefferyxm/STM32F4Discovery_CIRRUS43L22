@@ -61,13 +61,28 @@ void Init_CIR43L22()
 	
         IDD = IIC_READ(ClockCtl);
 // 5 power up
-	
 
         
 // 6 reset low
 	//reset_low();
-        
-        
+     
+}
+
+
+void DeInit_CIR43L22()
+{
+    //1. Mute the DAC¡¯s and PWM outputs.
+  
+    //2. Disable soft ramp and zero cross volume transitions.
+  
+    //3. Set the ¡°Power Ctl 1¡± register (0x02) to 0x9F.
+  
+    //4. Wait at least 100 ¦Ìs
+  
+    //5. MCLK may be removed at this time.
+  
+    //6. To achieve the lowest operating quiescent current, bring RESET low. All control port registers will be
+    //   reset to their default state.
 }
 
 

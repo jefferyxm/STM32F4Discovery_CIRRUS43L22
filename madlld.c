@@ -423,6 +423,8 @@ int MpegAudioDecoder(FIL *InputFp)
 	mad_synth_finish(&Synth);
 	mad_frame_finish(&Frame);
 	mad_stream_finish(&Stream);
+        
+        
   
         stopDMA();
         startPlay = 0;
